@@ -3,22 +3,24 @@ package com.thelightphone.sample
 import android.util.Log
 import com.thelightphone.sdk.EntryPoint
 import com.thelightphone.sdk.LightEntryPoint
-import com.thelightphone.sdk.shared.LightServerHandshake
-import kotlinx.coroutines.CoroutineScope
+import com.thelightphone.sdk.shared.LightServerData
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 
 @EntryPoint
 object ToolEntryPoint : LightEntryPoint {
     // called when Tool first launches, use to initialize dependencies etc
-    override fun onToolCreate(
-        lightOsData: StateFlow<LightServerHandshake?>,
-        toolScope: CoroutineScope
+    override suspend fun onToolCreate(
+        serverData: StateFlow<LightServerData?>,
     ) {
-        toolScope.launch {
-            lightOsData.collect {
-                Log.d("ToolEntryPoint", "Current LightOS registration data: $it")
-            }
+        serverData.collect {
+            // this is where you'd send push credentials up to your app server
+            Log.d("ToolEntryPoint", "Current LightOS registration data: $it")
         }
+    }
+
+    override suspend fun onPushNotification(
+        data: ByteArray,
+    ) {
+        Log.d("ToolEntryPoint", "received push notification: $data")
     }
 }

@@ -28,31 +28,31 @@ object LightSdkServer {
             return isSystemApp && isSystemUid
         }
 
-    fun Context.messageClient(clientPackageName: String, clientPublicKeyBase64: String, data: String) {
-        try {
-            val encoded: String = LightCrypto.encrypt(data, clientPublicKeyBase64)
-
-            val senderIdentity =
-                PendingIntent.getBroadcast(this, 0, Intent(), PendingIntent.FLAG_IMMUTABLE)
-
-            val intent = Intent(LightConstants.ACTION_SDK_MARKER)
-            intent.setPackage(clientPackageName)
-            intent.putExtra("data", encoded)
-            intent.putExtra("sender_identity", senderIdentity)
-            if (runningAsSystemApp) {
-                val current = UserHandle::class.java.getField("CURRENT").get(null) as UserHandle
-                sendBroadcastAsUser(intent, current)
-            } else {
-                sendBroadcast(intent)
-            }
-        } catch (e: Exception) {
-            Log.e(
-                TAG,
-                "Failed to send encrypted message to client: $clientPackageName",
-                e
-            )
-        }
-    }
+//    fun Context.messageClient(clientPackageName: String, clientPublicKeyBase64: String, data: String) {
+//        try {
+//            val encoded: String = LightCrypto.encrypt(data, clientPublicKeyBase64)
+//
+//            val senderIdentity =
+//                PendingIntent.getBroadcast(this, 0, Intent(), PendingIntent.FLAG_IMMUTABLE)
+//
+//            val intent = Intent(LightConstants.ACTION_SDK_MARKER)
+//            intent.setPackage(clientPackageName)
+//            intent.putExtra("data", encoded)
+//            intent.putExtra("sender_identity", senderIdentity)
+//            if (runningAsSystemApp) {
+//                val current = UserHandle::class.java.getField("CURRENT").get(null) as UserHandle
+//                sendBroadcastAsUser(intent, current)
+//            } else {
+//                sendBroadcast(intent)
+//            }
+//        } catch (e: Exception) {
+//            Log.e(
+//                TAG,
+//                "Failed to send encrypted message to client: $clientPackageName",
+//                e
+//            )
+//        }
+//    }
 
     /**
      * returns true iff this server version supports tools built with given sdkVersion

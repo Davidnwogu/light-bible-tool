@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import com.thelightphone.sdk.server.LightPushRegistry
 import com.thelightphone.sdk.server.LightSdkServer
 import com.thelightphone.sdk.server.LightSdkServer.filterVerifiedTools
 import com.thelightphone.sdk.server.LightSdkServer.queryInstalledClients
@@ -50,6 +51,11 @@ class MainActivity : ComponentActivity() {
                 "LightEmulator",
                 "WARNING: LightOS emulator is NOT running as a system app and may not work."
             )
+        }
+        LightPushRegistry.endpointFetcher = { token, vapid ->
+            // TODO this will refer to internal http server eventually
+            Log.d("LightEmulator", "getting push endpoint for token: $token, vapid: $vapid")
+            "http://localhost/push/$token"
         }
         setContent {
             MaterialTheme(

@@ -1,11 +1,13 @@
 [versions]
 agp = "8.12.3"
+connector = "3.3.2"
 kotlin = "2.3.20"
 composeBom = "2026.03.01"
 ktor = "3.4.2"
 ksp = "2.3.6"
 
 [libraries]
+unifiedpush-connector = { module = "org.unifiedpush.android:connector", version.ref = "connector" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 
 compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }

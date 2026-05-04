@@ -1,3 +1,6 @@
+import java.util.Properties
+import kotlin.apply
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
@@ -12,10 +15,17 @@ android {
     namespace = "com.thelightphone.sdk"
     compileSdk = rootProject.ext["compileSdk"] as Int
 
+    val localProps = Properties().apply {
+        val f = rootProject.file("local.properties")
+        if (f.exists()) f.inputStream().use { load(it) }
+    }
+    val vapidPublicKey = localProps.getProperty("vapidPublicKey", "")
+
     defaultConfig {
         minSdk = rootProject.ext["minSdk"] as Int
         // TODO inject
         buildConfigField("String", "LIGHT_SERVER_PACKAGE", "\"com.thelightphone.sdk.emulator\"")
+        buildConfigField("String", "LIGHT_VAPID_KEY", "\"$vapidPublicKey\"")
     }
 
     buildFeatures {
@@ -46,6 +56,7 @@ dependencies {
     api(libs.ktor.client.okhttp)
     api(libs.ktor.client.content.negotiation)
     api(libs.ktor.serialization.json)
+    implementation(libs.unifiedpush.connector)
     lintChecks(project(":lint-rules"))
 
     testImplementation(libs.kotlin.test)

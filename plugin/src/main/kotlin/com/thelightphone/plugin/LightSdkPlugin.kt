@@ -23,6 +23,7 @@ class LightSdkPlugin : Plugin<Project> {
             "io.ktor",
             "org.jetbrains.kotlinx:kotlinx-serialization",
             "org.jetbrains.kotlinx:kotlinx-io",
+            "org.unifiedpush.android:connector"
         )
 
         val ALLOWED_PLUGINS = setOf(
