@@ -5,6 +5,9 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import com.thelightphone.sdk.shared.LightConstants
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class LightPushDistributor : BroadcastReceiver() {
 
@@ -69,25 +72,32 @@ class LightPushDistributor : BroadcastReceiver() {
         val channel = intent.getStringExtra("message")
         val vapid = intent.getStringExtra("vapid")
 
-        val endpoint = runCatching {
-            LightSdkServer.pushEndpointFetcher.invoke(callerPackage, token, vapid)
-        }.getOrNull()
+        val pendingResult = goAsync()
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val endpoint = runCatching {
+                    LightSdkServer.pushEndpointFetcher.invoke(callerPackage, token, vapid)
+                }.getOrNull()
 
-        if (endpoint == null) {
-            Log.e(TAG, "Failed to fetch endpoint for $callerPackage token=$token")
-            sendRegistrationFailed(context, callerPackage, token)
-            return
+                if (endpoint == null) {
+                    Log.e(TAG, "Failed to fetch endpoint for $callerPackage token=$token")
+                    sendRegistrationFailed(context, callerPackage, token)
+                    return@launch
+                }
+
+                LightPushRegistry.register(token, callerPackage, endpoint, channel, vapid)
+                Log.i(TAG, "Registered $callerPackage with token $token (channel=$channel)")
+
+                val response = Intent(ACTION_NEW_ENDPOINT).apply {
+                    setPackage(callerPackage)
+                    putExtra("token", token)
+                    putExtra("endpoint", endpoint)
+                }
+                context.sendBroadcast(response)
+            } finally {
+                pendingResult.finish()
+            }
         }
-
-        LightPushRegistry.register(token, callerPackage, endpoint, channel, vapid)
-        Log.i(TAG, "Registered $callerPackage with token $token (channel=$channel)")
-
-        val response = Intent(ACTION_NEW_ENDPOINT).apply {
-            setPackage(callerPackage)
-            putExtra("token", token)
-            putExtra("endpoint", endpoint)
-        }
-        context.sendBroadcast(response)
     }
 
     private fun sendRegistrationFailed(context: Context, packageName: String?, token: String?) {
